@@ -132,6 +132,12 @@ class MockAgent:
                 cards=[_program_card()],
                 suggestions=["What does a typical week look like?", "What do I need to apply?"],
             )
+        if re.search(r"what programs|which programs|explore programs|(programs?|courses?).*\boffer|\boffer\b.*programs?", t):
+            return AgentReply(
+                "This simulation covers one program, IT Support Specialist. Here's a quick overview.",
+                cards=[_program_card(), _sources_card()],
+                suggestions=["What do I need to apply?", "Can I start in January?", "What does a typical week look like?"],
+            )
         if re.search(r"apply|program|admission|requirement|explore|offer|learn", t):
             return AgentReply(
                 "To apply for IT Support Specialist you'll need a high school diploma or GED, a "

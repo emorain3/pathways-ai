@@ -4,54 +4,23 @@ APP_NAME = "Pathways AI"
 
 # ---- Home screen ---------------------------------------------------------------------------
 HERO_TITLE = "This is the Pathways AI simulation."
-HERO_BODY = (
-    "A test environment with fictional data. It explores how nonprofit professional-development "
-    "programs could run admissions more easily, so the people who serve their communities spend "
-    "less time on process and more on giving back."
-)
+HERO_BODY = [
+    "An exploration of how automating parts of the admissions process could lower the barrier to entry, "
+    "so learners feel clear about their next step instead of overwhelmed.",
+    "This is a test environment with fictional data.",
+]
 COMPOSER_PLACEHOLDER_HOME = "Hi, I'm Pathways. Ask me about programs, admissions, or your application…"
 COMPOSER_PLACEHOLDER_DOCK = "Ask about programs, admissions, or your application…"
 DOCK_NOTE = "Fictional data, built as a test to make nonprofit professional-development admissions easier."
 
-# ---- The three journeys: each tile sends exactly one canned message ------------------------------
-EXPLORE_MESSAGE = "What do I need to apply for IT Support?"
+# ---- The three journeys: each starter pill sends exactly one canned message ------------------------
+EXPLORE_MESSAGE = "What programs do you offer?"
 STATUS_MESSAGE = "Where is my application?"
 HUMAN_MESSAGE = "I'd like to talk to someone."
 
-# icon: key into theme.ICONS, tint: gradient for the icon orb
-TILES = [
-    {
-        "key": "explore",
-        "title": "Explore programs",
-        "message": EXPLORE_MESSAGE,
-        "icon": "book",
-        "tint": ("#FFE0EE", "#FFB3D6"),
-        "badge": None,
-    },
-    {
-        "key": "status",
-        "title": "Check my application",
-        "message": STATUS_MESSAGE,
-        "icon": "clipboard",
-        "tint": ("#E3F0FF", "#A6CDFF"),
-        "badge": "ID CHECK",
-    },
-    {
-        "key": "human",
-        "title": "Talk to a person",
-        "message": HUMAN_MESSAGE,
-        "icon": "person",
-        "tint": ("#EBE2FF", "#C5B2FF"),
-        "badge": None,
-    },
-]
-
-# ---- Suggested questions ---------------------------------------------------------------------
-HOME_SUGGESTIONS = [
-    "What programs start in January?",
-    "What do I need to apply?",
-    "How much does it cost?",
-]
+# Home screen: one starter per journey, kept general so visitors are not boxed into one question.
+HOME_SUGGESTIONS = [EXPLORE_MESSAGE, STATUS_MESSAGE, HUMAN_MESSAGE]
+# Fallback follow-ups inside a conversation when a reply does not suggest its own.
 DEFAULT_SUGGESTIONS = ["Explore programs", "Check my application", "Talk to an advisor"]
 
 # ---- Demo data used by the mock agent (all fictional) ----------------------------------------------

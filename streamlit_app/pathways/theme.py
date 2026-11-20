@@ -83,17 +83,6 @@ _AVATAR = (
     "</g></svg>"
 )
 
-_STROKE = f"fill='none' stroke='{INK}' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'"
-ICONS = {
-    "book": f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28' {_STROKE}><path d='M3 6h7a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H3zM25 6h-7a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h8z'/></svg>",
-    "clipboard": f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28' {_STROKE}><rect x='5' y='5' width='18' height='20' rx='3'/><path d='M10 5V3.5h8V5M10 15l3 3 5-6'/></svg>",
-    "person": f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28' {_STROKE}><circle cx='14' cy='9' r='4'/><path d='M5 24c1-5 4-7 9-7s8 2 9 7'/></svg>",
-}
-_LOCK = (
-    f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='{INK}' stroke-width='2.6' "
-    "stroke-linecap='round' stroke-linejoin='round'><rect x='5' y='11' width='14' height='10' rx='2'/>"
-    "<path d='M8 11V8a4 4 0 0 1 8 0v3'/></svg>"
-)
 _ARROW = (
     "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='#fff' stroke-width='2.4' "
     "stroke-linecap='round' stroke-linejoin='round'><path d='M4 12h15M13 6l6 6-6 6'/></svg>"
@@ -174,6 +163,7 @@ BASE_CSS = """
   line-height:1.04; font-size:clamp(40px,5.8vw,62px); letter-spacing:0;
   background:linear-gradient(90deg,#4A46D8,#A93C9E); -webkit-background-clip:text; background-clip:text; color:transparent}
 .pw-lede{margin:0; max-width:640px; font-size:17px; line-height:1.65; color:var(--pw-sec)}
+.pw-lede + .pw-lede{margin-top:-12px}
 
 /* ---------- buttons: chips ---------- */
 .st-key-chips_home, .st-key-chips_dock{flex-direction:row !important; flex-wrap:wrap; gap:8px 10px !important}
@@ -187,7 +177,8 @@ BASE_CSS = """
 
 /* ---------- composer (home card and conversation dock) ---------- */
 .st-key-composer_home{
-  border:2px solid transparent; border-radius:28px; padding:14px 16px 14px 24px; gap:10px !important;
+  /* top padding = bottom padding + one pill row (44px) + gap (10px), which centres the input row in the card */
+  border:2px solid transparent; border-radius:28px; padding:68px 16px 14px 24px; gap:10px !important;
   background:linear-gradient(rgba(255,255,255,.78),rgba(255,255,255,.78)) padding-box,
              linear-gradient(120deg,#FF8FC0,#8FBEFF,#B49BFF) border-box;
   box-shadow:0 20px 50px rgba(104,92,200,.22)}
@@ -210,23 +201,6 @@ BASE_CSS = """
 .stApp [class*="st-key-composer_"] [data-testid="stBaseButton-primaryFormSubmit"] p{font-size:0 !important; line-height:0 !important; margin:0}
 [class*="st-key-composer_"] [data-testid="stBaseButton-primaryFormSubmit"]::after{
   content:""; position:absolute; inset:0; background:__ARROW__ center/22px no-repeat}
-
-/* ---------- starter tiles (each sends one canned message) ---------- */
-[class*="st-key-tile_"], [class*="st-key-tile_"] > div{width:100%}
-[class*="st-key-tile_"] button{
-  position:relative; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:10px;
-  width:100%; min-height:152px; padding:18px; text-align:left; border-radius:22px; color:var(--pw-ink);
-  background:var(--pw-glass); border:1px solid var(--pw-border); box-shadow:var(--pw-shadow);
-  -webkit-backdrop-filter:blur(22px) saturate(160%); backdrop-filter:blur(22px) saturate(160%);
-  transition:transform .18s ease, box-shadow .18s ease}
-[class*="st-key-tile_"] button:hover{transform:translateY(-3px); box-shadow:0 20px 44px rgba(104,92,200,.24), inset 0 1px 0 rgba(255,255,255,.9); border-color:#fff; color:var(--pw-ink)}
-[class*="st-key-tile_"] button > div{width:100%; justify-content:flex-start !important}
-[class*="st-key-tile_"] button p{font-size:18px; font-weight:600; line-height:1.2; text-align:left; margin:0}
-[class*="st-key-tile_"] button::before{
-  content:""; flex:none; width:46px; height:46px; border-radius:50%; box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 6px 16px rgba(104,92,200,.25)}
-[class*="st-key-tile_"] button::after{
-  font-family:'Cormorant Garamond',serif; font-style:italic; font-weight:600; font-size:19px; line-height:1.3; color:var(--pw-sec);
-  text-align:left; white-space:normal}
 
 /* ---------- start-over button ---------- */
 .st-key-new_chat button{
@@ -380,15 +354,19 @@ ol.pw-track > li{margin:0 !important; padding:0 !important}
 @keyframes pw-shim{from{background-position:200% 0}to{background-position:-200% 0}}
 @media (prefers-reduced-motion:reduce){
   .pw-float,.pw-twinkle,.pw-dots i,.pw-shim{animation:none !important}
-  [class*="st-key-tile_"] button, .st-key-chips_home button, .st-key-chips_dock button{transition:none}
+  .st-key-chips_home button, .st-key-chips_dock button{transition:none}
 }
 
 /* ---------- small screens ---------- */
+@media (max-width:799px){
+  /* pills wrap onto several rows here, so mirroring one row would over-pad; keep a moderate top gap */
+  .st-key-composer_home{padding-top:30px}
+}
 @media (max-width:640px){
   [data-testid="stMainBlockContainer"]{padding:14px 16px 20px}
   .pw-word{font-size:30px}
   .pw-lede{font-size:15.5px}
-  .st-key-composer_home{padding:10px 10px 10px 18px}
+  .st-key-composer_home{padding:30px 10px 10px 18px}
   [class*="st-key-turn_asst_"]{padding-left:0}
   [class*="st-key-turn_asst_"]::before{display:none}
   .pw-status{padding:16px}
@@ -399,27 +377,11 @@ ol.pw-track > li{margin:0 !important; padding:0 !important}
 
 
 def build_css() -> str:
-    """The full stylesheet: static rules plus one block per starter tile."""
+    """The full stylesheet, with the inline image placeholders filled in."""
     css = (
         BASE_CSS.replace("__GRAIN__", svg_uri(_GRAIN))
         .replace("__ARROW__", svg_uri(_ARROW))
         .replace("__REFRESH__", svg_uri(_REFRESH))
         .replace("__AVATAR__", svg_uri(_AVATAR))
     )
-    parts = [FONT_IMPORT, css]
-    for tile in content.TILES:
-        key = f".st-key-tile_{tile['key']}"
-        c1, c2 = tile["tint"]
-        parts.append(
-            f'{key} button::before{{background:{svg_uri(ICONS[tile["icon"]])} center/24px no-repeat,'
-            f"linear-gradient(135deg,{c1},{c2})}}"
-            f'{key} button::after{{content:"{css_string(chr(8220) + tile["message"] + chr(8221))}"}}'
-        )
-        if tile["badge"]:
-            parts.append(
-                f'{key} button > div::after{{content:"{css_string(tile["badge"])}"; position:absolute; top:22px; right:18px;'
-                f"padding:3px 10px 3px 26px; border-radius:999px; border:1px solid rgba(91,87,232,.35);"
-                f"background:{svg_uri(_LOCK)} 9px center/12px no-repeat, rgba(255,255,255,.8);"
-                f"font:600 11px/1.4 'Poppins',sans-serif; letter-spacing:.06em; color:{INK}}}"
-            )
-    return "".join(parts)
+    return FONT_IMPORT + css

@@ -77,7 +77,7 @@ def _plain(text: str) -> str:
 def render_header(in_chat: bool) -> None:
     # TODO(post-MVP): optional header pills on the right, "Not verified · Sign in" and "Talk to a person".
     # The sign-in pill needs an auth callback from Salesforce to flip to "Verified", so it is parked on
-    # purpose. The tiles and in-chat dialogs already cover both journeys.
+    # purpose. The starter pills and in-chat dialogs already cover both journeys.
     with st.container(key="head"):
         st.html(cards.brand_html())
         if in_chat:
@@ -104,10 +104,6 @@ def render_home() -> None:
         with st.container(key="chips_home"):
             for i, label in enumerate(content.HOME_SUGGESTIONS):
                 st.button(label, key=f"chip_home_{i}", on_click=queue_message, args=(label,))
-    columns = st.columns(len(content.TILES), gap="medium")
-    for column, tile in zip(columns, content.TILES):
-        with column:
-            st.button(tile["title"], key=f"tile_{tile['key']}", on_click=queue_message, args=(tile["message"],))
 
 
 # ---- Conversation -------------------------------------------------------------------------------------------------

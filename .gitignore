@@ -46,3 +46,58 @@ $RECYCLE.BIN/
 **/__pycache__/
 **/.venv/
 **/venv/
+
+# BOILERPLATE 
+
+# ==========================================
+# PATHWAYS AI - ADDITIONAL GIT IGNORE RULES
+# ==========================================
+
+# Salesforce CLI local state
+.sf/
+.sfdx/
+.localdevserver/
+
+# Node.js and build artifacts
+node_modules/
+.npm/
+coverage/
+.eslintcache
+
+# Python compiled files and caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+htmlcov/
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Streamlit local secrets
+**/.streamlit/secrets.toml
+
+# Authentication keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+
+# Local logs
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db

@@ -34,23 +34,25 @@ def _submit_dialog(app: AppTest, name: str, label_prefix: str) -> None:
     assert not app.exception
 
 
-def test_home_shows_three_tiles_and_no_chat(at):
+def test_home_shows_one_starter_per_journey_and_no_tiles(at):
     assert at.session_state.messages == []
-    for key in ("tile_explore", "tile_status", "tile_human"):
-        assert at.button(key=key) is not None
+    labels = [b.label for b in at.button if (b.key or "").startswith("chip_home_")]
+    assert labels == [content.EXPLORE_MESSAGE, content.STATUS_MESSAGE, content.HUMAN_MESSAGE]
+    assert not [b for b in at.button if (b.key or "").startswith("tile_")]
 
 
-def test_explore_tile_sends_one_canned_message(at):
-    _click(at, "tile_explore")
+def test_explore_starter_sends_one_canned_message(at):
+    _click(at, "chip_home_0")
     msgs = at.session_state.messages
     assert msgs[0] == {"role": "user", "text": content.EXPLORE_MESSAGE}
     assert msgs[1]["role"] == "assistant"
+    assert "one program" in msgs[1]["text"]
     assert {c["kind"] for c in msgs[1]["cards"]} >= {"program", "sources"}
     assert at.session_state.pending is None
 
 
 def test_typed_message_goes_through_the_dock(at):
-    _click(at, "tile_explore")
+    _click(at, "chip_home_0")
     at.text_input(key="msg_dock").set_value("How much does it cost?")
     send = [b for b in at.button if b.proto.form_id == "form_dock"]
     assert send, "dock composer has a send button"
@@ -61,7 +63,7 @@ def test_typed_message_goes_through_the_dock(at):
 
 
 def test_status_journey_verify_then_status(at):
-    _click(at, "tile_status")
+    _click(at, "chip_home_1")
     # first run queues the message, the next run asks for verification
     assert at.session_state.messages[0]["text"] == content.STATUS_MESSAGE
     assert at.session_state.messages[-1]["action"] == "verify"
@@ -77,7 +79,7 @@ def test_status_journey_verify_then_status(at):
 
 
 def test_wrong_credentials_keep_the_dialog_and_show_an_error(at):
-    _click(at, "tile_status")
+    _click(at, "chip_home_1")
     at.text_input(key="verify_email").set_value("nobody@example.com")
     at.text_input(key="verify_app_id").set_value("APP-99999")
     _submit_dialog(at, "verify", "Verify and continue")
@@ -86,7 +88,7 @@ def test_wrong_credentials_keep_the_dialog_and_show_an_error(at):
 
 
 def test_human_journey_ends_with_a_reference(at):
-    _click(at, "tile_human")
+    _click(at, "chip_home_2")
     assert at.session_state.messages[-1]["action"] == "handoff"
     _submit_dialog(at, "handoff", "Send request")
     last = at.session_state.messages[-1]
@@ -104,7 +106,7 @@ def test_backend_failure_shows_a_recoverable_error(at):
 
 
 def test_new_chat_resets_everything(at):
-    _click(at, "tile_explore")
+    _click(at, "chip_home_0")
     assert at.session_state.messages
     _click(at, "new_chat")
     assert at.session_state.messages == []

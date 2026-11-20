@@ -94,13 +94,15 @@ def brand_html() -> str:
     )
 
 
-def hero_html(title: str, body: str) -> str:
+def hero_html(title: str, paragraphs: list[str]) -> str:
     return (
         '<div class="pw-hero"><div class="pw-mascot"><div class="pw-halo" aria-hidden="true"></div>'
         + theme.cloud_svg("hero", 128, 98, "pw-float")
         + theme.sparkle_svg("hero1", 40, "s1 pw-twinkle")
         + theme.sparkle_svg("hero2", 20, "s2 pw-twinkle")
-        + f'</div><h1 class="pw-title">{esc(title)}</h1><p class="pw-lede">{esc(body)}</p></div>'
+        + f'</div><h1 class="pw-title">{esc(title)}</h1>'
+        + "".join(f'<p class="pw-lede">{esc(text)}</p>' for text in paragraphs)
+        + "</div>"
     )
 
 

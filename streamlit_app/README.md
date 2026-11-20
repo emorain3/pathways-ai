@@ -5,9 +5,9 @@ programs could run admissions more easily, so the people who serve their communi
 and more on giving back. **All data is fictional.** The UI is built in Streamlit; the agent behind it is
 swappable. Today it is a mock. Next it will be a Salesforce Agentforce agent.
 
-Three journeys:
+Three journeys, each started from a suggested question on the home screen (or by typing):
 
-1. **Explore programs** - ask about admissions requirements, get a program card and cited sources.
+1. **Explore programs** - ask what's offered and what admissions require; get a program card and cited sources. The simulation covers one program, IT Support Specialist.
 2. **Check my application** - verify identity, then see the current stage and the next required action.
 3. **Talk to a person** - fill in a short request form, get a confirmation and a reference number.
 

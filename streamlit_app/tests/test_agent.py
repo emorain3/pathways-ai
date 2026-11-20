@@ -16,11 +16,17 @@ def test_default_backend_is_mock(monkeypatch):
     assert isinstance(get_agent(), MockAgent)
 
 
-def test_explore_message_returns_program_and_sources(agent):
+def test_explore_message_says_one_program_and_shows_it(agent):
     reply = agent.send(content.EXPLORE_MESSAGE, verified=False)
     kinds = [c["kind"] for c in reply.cards]
     assert "program" in kinds and "sources" in kinds
+    assert "one program" in reply.text
     assert reply.action is None
+
+
+def test_requirements_question_still_gets_requirements(agent):
+    reply = agent.send("What do I need to apply?", verified=False)
+    assert "diploma" in reply.text.lower()
 
 
 def test_status_requires_verification_first(agent):
