@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Application__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Optional link to the related Application record when a follow-up request pertains to a specific application.</description>
+    <inlineHelpText>Optional: select the application this request relates to, if applicable.</inlineHelpText>
+    <label>Application</label>
+    <lookupFilter>
+        <active>true</active>
+        <filterItems>
+            <field>Application__c.Applicant__c</field>
+            <operation>equals</operation>
+            <valueField>$Source.Applicant__c</valueField>
+        </filterItems>
+        <isOptional>false</isOptional>
+    </lookupFilter>
+    <referenceTo>Application__c</referenceTo>
+    <relationshipLabel>Follow-Up Requests</relationshipLabel>
+    <relationshipName>Follow_Up_Requests</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

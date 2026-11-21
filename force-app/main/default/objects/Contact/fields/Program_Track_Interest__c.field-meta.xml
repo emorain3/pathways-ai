@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Program_Track_Interest__c</fullName>
+    <description>Primary workforce track the prospective learner or applicant is interested in.</description>
+    <label>Program Track Interest</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Cloud &amp; Data Engineering</fullName>
+                <default>false</default>
+                <label>Cloud &amp; Data Engineering</label>
+            </value>
+            <value>
+                <fullName>Cybersecurity Operations</fullName>
+                <default>false</default>
+                <label>Cybersecurity Operations</label>
+            </value>
+            <value>
+                <fullName>Healthcare IT Support</fullName>
+                <default>false</default>
+                <label>Healthcare IT Support</label>
+            </value>
+            <value>
+                <fullName>Undecided</fullName>
+                <default>false</default>
+                <label>Undecided</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

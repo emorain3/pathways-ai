@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>User_Confirmed__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Audit flag confirming the user explicitly approved creating this request.</description>
+    <inlineHelpText>Checked automatically when created via confirmed agent action.</inlineHelpText>
+    <label>User Confirmed</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Program_Code__c</fullName>
+    <caseSensitive>true</caseSensitive>
+    <description>Short unique code identifying the training program.</description>
+    <externalId>true</externalId>
+    <inlineHelpText>e.g., CDE-101</inlineHelpText>
+    <label>Program Code</label>
+    <length>20</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>true</unique>
+</CustomField>

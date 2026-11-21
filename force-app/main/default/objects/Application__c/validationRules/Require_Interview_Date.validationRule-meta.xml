@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Require_Interview_Date</fullName>
+    <active>true</active>
+    <description>Prevent an admissions staff member from marking an interview as scheduled without recording when it will take place.</description>
+    <errorConditionFormula>AND(
+    ISPICKVAL(Stage__c, &quot;Interview Scheduled&quot;),
+    ISBLANK(Interview_Date__c)
+)</errorConditionFormula>
+    <errorDisplayField>Interview_Date__c</errorDisplayField>
+    <errorMessage>Please provide the interview date and time before changing the application stage to Interview Scheduled.</errorMessage>
+</ValidationRule>

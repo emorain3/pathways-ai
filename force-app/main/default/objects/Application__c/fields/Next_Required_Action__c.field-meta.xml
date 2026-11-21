@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Next_Required_Action__c</fullName>
+    <description>Deterministic next-step guidance computed directly from Stage and Missing Documents.</description>
+    <externalId>false</externalId>
+    <formula>CASE(TEXT(Stage__c),
+  &quot;Draft&quot;, &quot;Complete all required sections of your application and submit it before the cohort deadline.&quot;,
+  &quot;Submitted&quot;, &quot;No immediate action required. Admissions is performing an initial completeness check.&quot;,
+  &quot;Documents Pending&quot;, &quot;Upload your missing required documents: &quot; &amp; BLANKVALUE(Missing_Documents__c, &quot;check your applicant checklist&quot;) &amp; &quot;.&quot;,
+  &quot;Interview Scheduled&quot;, &quot;Attend your scheduled admissions interview and confirm your calendar invite.&quot;,
+  &quot;Under Final Review&quot;, &quot;No action needed. Your file is with the Admissions Committee.&quot;,
+  &quot;Admitted&quot;, &quot;Accept your admission offer and complete enrollment onboarding.&quot;,
+  &quot;Waitlisted&quot;, &quot;Confirm whether you wish to remain on the waitlist for open seats in the upcoming cohort.&quot;,
+  &quot;Not Selected&quot;, &quot;Review advisor feedback or schedule an admissions consultation to discuss eligibility for the next cohort.&quot;,
+  &quot;Contact Admissions Support for current status guidance.&quot;
+)</formula>
+    <inlineHelpText>Automatically calculated next step for the applicant.</inlineHelpText>
+    <label>Next Required Action</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

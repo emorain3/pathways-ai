@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Require_Missing_Documents</fullName>
+    <active>true</active>
+    <description>Ensures that an application cannot be saved in the Documents Pending stage without the missing-document information.</description>
+    <errorConditionFormula>AND(
+    ISPICKVAL(Stage__c, &quot;Documents Pending&quot;),
+    ISBLANK(Missing_Documents__c)
+)</errorConditionFormula>
+    <errorDisplayField>Missing_Documents__c</errorDisplayField>
+    <errorMessage>Please specify the missing documents before changing the application stage to Documents Pending.</errorMessage>
+</ValidationRule>
