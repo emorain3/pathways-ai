@@ -134,7 +134,7 @@ def start_session() -> dict:
     payload = {
         "externalSessionKey": external_session_key,
         "instanceConfig": {"endpoint": my_domain},
-        "bypassUser": False,  # Use the Run As user associated with the OAuth token.
+        "bypassUser": True,  # Use the Run As user associated with the OAuth token.
         "tz": "America/New_York",
         "variables": [
             {"name": "$Context.EndUserLanguage", "type": "Text", "value": "en_US"}
