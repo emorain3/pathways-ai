@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import logging
 import re
 import uuid
 
 import streamlit as st
 
 from . import cards, content, theme
-from .agent import AgentClient, AgentReply, get_agent
+from .agent import AgentClient, AgentReply, SalesforceAgent, get_agent
+
+_LOG = logging.getLogger(__name__)
+
 
 # ---- State -----------------------------------------------------------------------------------------------------
 
@@ -26,6 +30,13 @@ def init_state() -> None:
 
 def reset_chat() -> None:
     ss = st.session_state
+    try:
+        agent = get_cached_agent()
+        if isinstance(agent, SalesforceAgent):
+            agent.end_session()
+    except Exception as exc:  # best-effort cleanup; do not expose credentials
+        _LOG.warning("Could not end agent session: %s", type(exc).__name__)
+    ss.pop("_sf_agent_session", None)
     ss.messages = []
     ss.pending = None
     ss.verified = None
@@ -54,7 +65,6 @@ def _retry(payload: dict) -> None:
     ss.pending = payload
 
 
-@st.cache_resource
 def get_cached_agent() -> AgentClient:
     return get_agent()
 
@@ -112,13 +122,25 @@ def render_home() -> None:
 def _render_assistant(i: int, msg: dict, is_last: bool) -> None:
     with st.container(key=f"turn_asst_{i}"):
         if msg.get("error"):
+            live = isinstance(get_cached_agent(), SalesforceAgent)
             with st.container(key=f"bub_err_{i}"):
-                st.html(cards.error_html(msg["reference"]))
+                if live:
+                    st.error(
+                        "Salesforce didn't confirm the outcome of that message. "
+                        "If you were submitting a request, check whether it was created "
+                        "before attempting it again."
+                    )
+                else:
+                    st.html(cards.error_html(msg["reference"]))
             if is_last:
-                st.button("Try again", key=f"retry_{i}", type="primary", on_click=_retry, args=(msg["retry"],))
-                st.button(
-                    "Talk to a person", key=f"err_human_{i}", on_click=queue_message, args=(content.HUMAN_MESSAGE,)
-                )
+                if live:
+                    # A timed-out request might have completed a write. No blind replay.
+                    st.button("New chat", key=f"restart_{i}", on_click=reset_chat)
+                else:
+                    st.button("Try again", key=f"retry_{i}", type="primary", on_click=_retry, args=(msg["retry"],))
+                    st.button(
+                        "Talk to a person", key=f"err_human_{i}", on_click=queue_message, args=(content.HUMAN_MESSAGE,)
+                    )
             return
         with st.container(key=f"bub_asst_{i}"):
             st.markdown(msg["text"])
@@ -195,10 +217,12 @@ def process_pending(slot, agent: AgentClient) -> None:
     try:
         reply: AgentReply = (
             agent.application_status()
-            if pending["kind"] == "lookup"
+            if pending["kind"] == "lookup" and not isinstance(agent, SalesforceAgent)
             else agent.send(pending["text"], verified=bool(ss.verified))
         )
-    except Exception:  # noqa: BLE001 - any backend failure becomes the friendly error state
+    except Exception as exc:  # no tokens, OTPs, payloads, or identifying data in logs
+        _LOG.warning("Agent request failed: %s (HTTP %s)",
+                     type(exc).__name__, getattr(exc, "status_code", "n/a"))
         ss.messages.append(
             {
                 "role": "assistant",
@@ -220,8 +244,9 @@ def process_pending(slot, agent: AgentClient) -> None:
             "suggestions": reply.suggestions,
         }
     )
-    ss.awaiting = reply.action
-    if reply.action:
+    # Native Agentforce handles OTP and follow-up confirmation within chat.
+    ss.awaiting = None if isinstance(agent, SalesforceAgent) else reply.action
+    if reply.action and not isinstance(agent, SalesforceAgent):
         ss.dialog = reply.action
     ss.pending = None
     st.rerun()
@@ -287,8 +312,10 @@ def _handoff_dialog(agent: AgentClient) -> None:
 
 
 def open_requested_dialog(agent: AgentClient) -> None:
-    """Open the verify or handoff dialog once, on the run right after it was requested."""
+    """Mock-only dialogs; live verification and follow-ups use Agentforce chat."""
     name = st.session_state.pop("dialog", None)
+    if isinstance(agent, SalesforceAgent):
+        return
     if name == "verify":
         _verify_dialog(agent)
     elif name == "handoff":

@@ -192,46 +192,76 @@ class MockAgent:
         )
 
 
-# ---- Salesforce agent (stub, filled in after the design is approved) -----------------------------------------
+# ---- Live Salesforce-backed agent ------------------------------------------------------------
 class SalesforceAgent:
-    """TODO(salesforce): Agentforce Agent API integration.
+    """Thin Streamlit adapter. Salesforce owns verification, actions and consent.
 
-    Outline, to verify against the current Salesforce docs before building:
-      1. Auth: OAuth client-credentials flow against the org's My Domain URL, with the token cached
-         (``st.cache_resource``) and refreshed on expiry.
-      2. Start a session for ``agent_id`` once per Streamlit session and keep the session id in
-         ``st.session_state``.
-      3. ``send``: post the user's text to the session, then map the response onto ``AgentReply``.
-         Verification and handoff should come back as explicit signals (for example an action or topic
-         in the agent's response) so ``action`` is set without keyword guessing in the UI.
-      4. ``verify`` and ``request_handoff`` should call the agent's actions, never trust client-side checks.
-      5. End the session when the chat is reset.
-    Credentials come from ``st.secrets["salesforce"]`` (see ``.streamlit/secrets.toml.example``).
+    Each browser session gets its own Salesforce Agent API session. No user-supplied
+    verification flag, Contact ID, or generated text can set the trusted identity.
     """
 
-    def __init__(self, settings: dict) -> None:
-        self.settings = settings
-
     def send(self, text: str, *, verified: bool) -> AgentReply:
-        raise NotImplementedError("TODO(salesforce): call the Agent API")
+        import streamlit as st
+        from . import agent_client
+
+        # The legacy mock-only `verified` flag has no meaning in live mode.
+        _ = verified
+        sf_state = st.session_state.get("_sf_agent_session")
+        if not sf_state:
+            session = agent_client.start_session()
+            sf_state = {"session_id": session["session_id"], "sequence_id": 1}
+            st.session_state["_sf_agent_session"] = sf_state
+
+        sequence = sf_state["sequence_id"]
+        response = agent_client.send_message(sf_state["session_id"], sequence, text)
+        # Salesforce accepted this turn; never replay it because parsing failed.
+        sf_state["sequence_id"] = sequence + 1
+
+        messages = response.get("messages", [])
+        answer = [
+            item["message"].strip()
+            for item in messages
+            if isinstance(item, dict)
+            and item.get("type") == "Inform"
+            and item.get("isContentSafe") is not False
+            and isinstance(item.get("message"), str)
+            and item["message"].strip()
+        ] if isinstance(messages, list) else []
+        if not answer:
+            raise AgentUnavailable("Salesforce returned no conversational answer")
+        # No mock cards, keyword-triggered dialogs, or invented action results.
+        return AgentReply(text="\n\n".join(answer))
+
+    def end_session(self) -> None:
+        import streamlit as st
+        from . import agent_client
+
+        state = st.session_state.pop("_sf_agent_session", None)
+        if state:
+            agent_client.end_session(state["session_id"])
 
     def verify(self, email: str, application_id: str) -> VerifyResult:
-        raise NotImplementedError("TODO(salesforce): call the verification action")
+        raise AgentUnavailable("Use Salesforce's native verification in the live chat")
 
     def application_status(self) -> AgentReply:
-        raise NotImplementedError("TODO(salesforce): fetch status through the agent")
+        raise AgentUnavailable("Request application status in the live chat")
 
     def request_handoff(
         self, topic: str, best_time: str, contact: str, note: str, transcript: list[dict]
     ) -> HandoffResult:
-        raise NotImplementedError("TODO(salesforce): create the follow-up case")
+        raise AgentUnavailable("Submit follow-up requests through the live agent conversation")
 
 
 def get_agent() -> AgentClient:
-    """Pick the backend. Defaults to the mock so the app always runs without credentials."""
-    backend = os.environ.get("PATHWAYS_BACKEND", "mock").lower()
-    if backend == "salesforce":
-        import streamlit as st
+    """Select the live backend with PATHWAYS_BACKEND='salesforce' in Streamlit secrets.
 
-        return SalesforceAgent(dict(st.secrets["salesforce"]))
-    return MockAgent()
+    Otherwise the existing demonstration remains in mock mode.
+    """
+    import streamlit as st
+
+    try:
+        setting = st.secrets.get("PATHWAYS_BACKEND", "")
+    except (FileNotFoundError, KeyError):
+        setting = ""
+    backend = (os.environ.get("PATHWAYS_BACKEND") or setting or "mock").strip().lower()
+    return SalesforceAgent() if backend == "salesforce" else MockAgent()
