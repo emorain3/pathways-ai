@@ -221,8 +221,12 @@ def process_pending(slot, agent: AgentClient) -> None:
             else agent.send(pending["text"], verified=bool(ss.verified))
         )
     except Exception as exc:  # no tokens, OTPs, payloads, or identifying data in logs
-        _LOG.warning("Agent request failed: %s (HTTP %s)",
-                     type(exc).__name__, getattr(exc, "status_code", "n/a"))
+        _LOG.warning(
+            "Agent request failed: %s (HTTP %s) — %s",
+            type(exc).__name__,
+            getattr(exc, "status_code", "n/a"),
+            exc,
+        )
         ss.messages.append(
             {
                 "role": "assistant",

@@ -59,7 +59,15 @@ def get_access_token(*, force_refresh: bool = False) -> str:
     except requests.RequestException as exc:
         raise SalesforceAPIError("Salesforce OAuth request could not be completed") from exc
     if not resp.ok:
-        raise SalesforceAPIError("Salesforce OAuth request was rejected", resp.status_code)
+        detail = ""
+        try:
+            err_json = resp.json()
+            err_code = err_json.get("error", "")
+            err_desc = err_json.get("error_description", "")
+            detail = f": {err_code} - {err_desc}".strip(" -")
+        except ValueError:
+            pass
+        raise SalesforceAPIError(f"Salesforce OAuth request was rejected{detail}", resp.status_code)
     try:
         payload = resp.json()
         token = payload["access_token"]
@@ -97,7 +105,19 @@ def _request(method: str, url: str, *, body: dict | None = None, timeout: int = 
         if response.status_code == 401 and attempt == 0:
             continue
         if not response.ok:
-            raise SalesforceAPIError("Salesforce Agent API request failed", response.status_code)
+            detail = ""
+            try:
+                err_json = response.json()
+                if isinstance(err_json, dict):
+                    code = err_json.get("errorCode") or err_json.get("code") or ""
+                    msg = err_json.get("message") or err_json.get("error") or ""
+                    detail = f" ({code}: {msg})".strip(" :") if (code or msg) else ""
+            except ValueError:
+                pass
+            raise SalesforceAPIError(
+                f"Salesforce Agent API request failed on {method} {url}{detail}",
+                response.status_code,
+            )
         if not response.content:
             return {}
         try:
