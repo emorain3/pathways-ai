@@ -263,5 +263,5 @@ def get_agent() -> AgentClient:
         setting = st.secrets.get("PATHWAYS_BACKEND", "")
     except (FileNotFoundError, KeyError):
         setting = ""
-    backend = (os.environ.get("PATHWAYS_BACKEND") or setting or "mock").strip().lower()
+    backend = str(setting or os.environ.get("PATHWAYS_BACKEND", "mock")).strip().lower()
     return SalesforceAgent() if backend == "salesforce" else MockAgent()
